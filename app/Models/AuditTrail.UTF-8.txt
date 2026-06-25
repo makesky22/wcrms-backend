@@ -1,0 +1,25 @@
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+class AuditTrail extends \Illuminate\Database\Eloquent\Model
+{
+    use HasFactory;
+    protected $fillable = ['user_id','action','model','model_id','changes','ip_address'];
+    protected $casts = ['changes' => 'array'];
+    public function user() { return $this->belongsTo(User::class); }
+    public static function log($user, $action, $model = null, $modelId = null, $changes = [])
+    {
+        try {
+            return static::create([
+                'user_id'    => optional($user)->id,
+                'action'     => $action,
+                'model'      => $model,
+                'model_id'   => $modelId,
+                'changes'    => $changes,
+                'ip_address' => request()->ip(),
+            ]);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+}
